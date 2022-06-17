@@ -1,39 +1,15 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, unused_label
 
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/src/rx_typedefs/rx_typedefs.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'package:sas/widgets/colors.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-
-// void main() => runApp(const MaterialApp(home: MyHome()));
-
-// class MyHome extends StatelessWidget {
-//   const MyHome({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Flutter Demo Home Page')),
-//       body: Center(
-//         child: ElevatedButton(
-//           onPressed: () {
-//             Navigator.of(context).push(MaterialPageRoute(
-//               builder: (context) => const QRViewExample(),
-//             ));
-//           },
-//           child: const Text('qrView'),
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 class QRViewExample extends StatefulWidget {
   const QRViewExample({Key? key}) : super(key: key);
@@ -65,83 +41,23 @@ class _QRViewExampleState extends State<QRViewExample> {
     );
   }
 
-  // Future<int> postQrScanId() async {
-  //   final url = Uri.parse('http://saswes.com/api/insert');
-  //   Map data = {"qr_code": "3145216064944"};
-  //   String body = json.encode(data);
-  //   try {
-  //     final http.Response response = await http.post(
-  //       // Uri.parse('http://saswes.com/api/insert'),
-  //       url,
-  //       headers: <String, String>{
-  //         // 'Content-Type': 'application/json; charset=UTF-8',
-  //         'Content-Type': 'application/json; charset=UTF-8',
-  //       },
-  //       //body: body,
-  //       body: jsonEncode(<String, String>{
-  //         'qr_code': '3145216064944',
-  //       }),
-  //     );
-
-  // debugPrint('Response Body : ${response.body} ');
-  // debugPrint('Response Body : ${response.statusCode}');
-  //     if (response.statusCode == 200) {
-  // Map obj = {};
-  // obj = jsonDecode(response.body);
-  // debugPrint('Response Body : ${obj['msg'] ?? 'Empty Message'}');
-  //       // int id = int.parse(obj);
-  //       // debugPrint('tttttttt : $id');
-  //       // return id;
-  //     } else {
-  //       throw Exception('loading failed!');
-  //     }
-  //   } catch (e) {
-  //     debugPrint('tttttttt: ' + e.toString());
-  //   }
-  //   return -1;
-  // }
-
-  postQrCodeData(
-    String userId,
-  ) async {
+  postQrCodeData(String userId) async {
     var response = await postQrScanId(userId);
     if (response.statusCode == 200) {
       Map obj = {};
       obj = jsonDecode(response.body);
       debugPrint('Response Body : ${obj['msg'] ?? 'Empty Message'}');
-      speak(obj['user'].toString() + ' your attendance has been marked ');
-      //Get.snackbar('Message', '${obj['msg'] ?? 'Empty Message'}');
-      Get.dialog(AlertDialog(
+      speak(obj['user'].toString() + ' ${obj['msg']} ');
+      Get.snackbar(
+        obj['user'].toString(),
+        '${obj['msg'] ?? 'Empty Message'}',
+        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: mainColor,
-        title: const Text(
-          'Message',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          '${obj['msg'] ?? 'Empty Message'}',
-          style: const TextStyle(color: Colors.white),
-        ),
-        actions: [
-          FlatButton(
-              onPressed: () {
-                Get.back();
-                Get.back();
-              },
-              child: const Text(
-                'ok',
-                style: TextStyle(color: Colors.white),
-              ))
-        ],
-      ));
+        colorText: Colors.white,
+      );
       debugPrint('Response Body : ${response.body} ');
       debugPrint('Response Body : ${response.statusCode}');
     }
-  }
-
-  @override
-  void initState() {
-    // postQrCodeData();
-    super.initState();
   }
 
   // In order to get hot reload to work we need to pause the camera if the platform
@@ -156,15 +72,18 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   int count = 1;
+  String userIdCopy = '';
 
   @override
   Widget build(BuildContext context) {
-    if (result != null && count == 1) {
-      count = 2;
-      String val = result!.code.toString();
-      debugPrint('Response Body val : $val');
-      postQrCodeData(val);
-    }
+    // if (result != null && count == 1) {
+    //   count = 2;
+    //   String val = result!.code.toString();
+    //   debugPrint('Response Body val : $val');
+    //   postQrCodeData(val);
+    // }else{
+    //   speak('Attendance Already Marked');
+    // }
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -173,18 +92,18 @@ class _QRViewExampleState extends State<QRViewExample> {
             alignment: Alignment.bottomCenter,
             child: FittedBox(
               fit: BoxFit.contain,
-              child: Container(                
+              child: Container(
                 width: Get.width,
                 color: Colors.transparent,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[                    
+                  children: <Widget>[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Container(
-                          margin: const EdgeInsets.all(8),                         
+                          margin: const EdgeInsets.all(8),
                           child: InkWell(
                             onTap: () async {
                               await controller?.toggleFlash();
@@ -235,7 +154,7 @@ class _QRViewExampleState extends State<QRViewExample> {
                           ),
                         )
                       ],
-                    ),                   
+                    ),
                   ],
                 ),
               ),
@@ -255,7 +174,7 @@ class _QRViewExampleState extends State<QRViewExample> {
     var scanArea = (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.height < 400)
         ? MediaQuery.of(context).size.height / 1.2
-        : MediaQuery.of(context).size.height / 1.45;
+        : MediaQuery.of(context).size.height / 1.2;
     // To ensure the Scanner view is properly sizes after rotation
     // we need to listen for Flutter SizeChanged notification and update controller
     return QRView(
@@ -263,11 +182,12 @@ class _QRViewExampleState extends State<QRViewExample> {
       cameraFacing: CameraFacing.front,
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
-          borderColor: Colors.red,
-          borderRadius: 10,
-          borderLength: 30,
-          borderWidth: 10,
-          cutOutSize: scanArea),
+        borderColor: Colors.red,
+        borderRadius: 10,
+        borderLength: 30,
+        borderWidth: 10,
+        cutOutSize: scanArea,
+      ),
       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
     );
   }
@@ -277,11 +197,18 @@ class _QRViewExampleState extends State<QRViewExample> {
       this.controller = controller;
     });
     controller.scannedDataStream.listen((scanData) {
-      setState(() {        
+      setState(() {
         result = scanData;
       });
-      //postQrCodeData(result!.code.toString());
+      postQrCodeData(scanData.code.toString());
+      controller.pauseCamera();
+      Future.delayed(const Duration(seconds: 1),(){
+        controller.resumeCamera();
+      });     
+           
     });
+    
+    // postQrCodeData(result!.code.toString());
   }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
