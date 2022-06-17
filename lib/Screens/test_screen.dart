@@ -57,8 +57,8 @@ class _QRViewExampleState extends State<QRViewExample> {
     await tts.speak(msg);
   }
 
-  Future<http.Response> postQrScanId() async {
-    final data = {"qr_code": "5714016070248"};
+  Future<http.Response> postQrScanId(String userId) async {
+    final data = {"qr_code": userId};
     return await http.post(
       Uri.parse('http://saswes.com/api/insert'),
       body: data,
@@ -104,7 +104,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   postQrCodeData(
     String userId,
   ) async {
-    var response = await postQrScanId();
+    var response = await postQrScanId(userId);
     if (response.statusCode == 200) {
       Map obj = {};
       obj = jsonDecode(response.body);
