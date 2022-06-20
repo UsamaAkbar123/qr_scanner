@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sas/main.dart';
+import 'package:http/http.dart' as http;
 import 'package:sas/widgets/colors.dart';
 import 'package:sas/widgets/custom_button.dart';
 import 'package:sas/widgets/custom_text_field.dart';
@@ -16,6 +18,9 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -27,7 +32,7 @@ class _SignInScreenState extends State<SignInScreen> {
           // height: Get.height,
           padding: EdgeInsets.only(left: 20, right: 25),
           child: Form(
-            // key: _formKey,
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -52,22 +57,22 @@ class _SignInScreenState extends State<SignInScreen> {
                 SizedBox(
                   height: Get.height / 20,
                 ),
-                const CustomTextField(
+                EmailTextField(
                   enable: false,
                   obscuretext: false,
-                  // txtController: emailController,
-                  hintText2: 'username',
-
-                  textInputType: TextInputType.text,
+                  txtController: emailController,
+                  hintText2: 'email',
+                  textInputType: TextInputType.emailAddress,
                 ),
                 SizedBox(
                   height: Get.height / 40,
                 ),
-                const CustomTextField(
+                PasswordTextField(
                   enable: false,
                   obscuretext: true,
                   hintText2: 'Password',
-                  textInputType: TextInputType.visiblePassword,
+                  textInputType: TextInputType.text,
+                  txtController: passwordController,
                 ),
                 SizedBox(
                   height: Get.height / 15,
@@ -77,9 +82,24 @@ class _SignInScreenState extends State<SignInScreen> {
                   labelColor: textColor,
                   color: mainColor,
                   radius: 8,
-                  onPress: () =>
-                      // Get.snackbar("Login", "Successfully You Login"),
-                      Get.offAll(const Dashboard()),
+                  // onPress: () => onloginSccess(),
+                  //  Get.snackbar(
+                  //   "Login",
+                  //   username.text + password.text,
+                  //   backgroundColor: mainColor,
+                  //   colorText: Colors.white,
+                  // ),
+
+                  onPress: () {
+                    if (_formKey.currentState!.validate()) {
+                      onloginSccess(
+                          emailController.text, passwordController.text);
+                    } else {
+                      (Get.snackbar("Error", "Something is Wrong",
+                          backgroundColor: mainColor, colorText: textColor));
+                    }
+                  },
+                  // Get.offAll(const Dashboard()),
                   // _onLogin(context),
                   buttonHeight: Get.height / 15,
                   buttonWidth: Get.width / 2,
@@ -90,5 +110,37 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
       ),
     ));
+  }
+
+  void onloginSccess(String em, String pas) async {
+    var response = await _onLogin(em, pas);
+    print("ya aya respose" + response.body.toString());
+    print(response.statusCode);
+
+    if (response.statusCode == 200) {
+      try {
+        Map signinData = {};
+        signinData = jsonDecode(response.body);
+        Get.offAll(Dashboard(
+          company_id: signinData['org_id'],
+          company_name: signinData['org_name'],
+          comapny_logo: signinData['logo'],
+        ));
+      } on Exception catch (e) {
+        Get.snackbar("Try Again", "Email or Password is Wrong",
+            backgroundColor: mainColor, colorText: textColor);
+      }
+    } else {
+      Get.snackbar("Error", "something is wrong");
+    }
+  }
+
+  Future<http.Response> _onLogin(String email, String pass) async {
+    Map data = {'email': email, 'password': pass};
+    print(data);
+    return await http.post(
+      Uri.parse('http://saswes.com/api/org_login'),
+      body: data,
+    );
   }
 }

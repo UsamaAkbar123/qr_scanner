@@ -6,18 +6,26 @@ import 'package:sas/widgets/colors.dart';
 import 'package:sas/widgets/custom_button.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({Key? key}) : super(key: key);
+  final String company_id;
+  final String comapny_logo;
+  final String company_name;
+
+  const Dashboard(
+      {Key? key,
+      required this.company_id,
+      required this.company_name,
+      required this.comapny_logo})
+      : super(key: key);
 
   @override
   State<Dashboard> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-  // late Image image1;
-
   @override
   void initState() {
     super.initState();
+    debugPrint(widget.comapny_logo + widget.company_id + widget.company_name);
     //image1 = Image.asset("images/barcode_cartoon.png");
   }
 
@@ -44,22 +52,29 @@ class _DashboardState extends State<Dashboard> {
             SizedBox(
               height: Get.height / 10,
             ),
-            SizedBox(
-              width: Get.width / 1.2,              
-              child: Image.asset("assets/images/barcode_cartoon.png",
-                  colorBlendMode: BlendMode.colorDodge, scale: 10),              
+            Image.network(
+              widget.comapny_logo,
+              colorBlendMode: BlendMode.colorDodge,
             ),
             SizedBox(
-              height: Get.height / 30,
+              height: Get.height / 20,
+            ),
+            Text("Welcome " + widget.company_name,
+                style: GoogleFonts.montserrat(
+                    color: textColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20)),
+            SizedBox(
+              height: Get.height / 20,
             ),
             CustomButton(
                 lable: "Scan Now",
                 onPress: () => Get.to(const QRViewExample(),
                     transition: Transition.rightToLeftWithFade,
-                    duration:const Duration(seconds: 1)),
+                    duration: const Duration(seconds: 1)),
                 color: mainColor,
                 radius: 8,
-                buttonHeight: Get.height / 15,
+                buttonHeight: Get.height / 14,
                 buttonWidth: Get.width / 2,
                 labelColor: textColor),
           ]),
@@ -70,7 +85,7 @@ class _DashboardState extends State<Dashboard> {
 
   Container firstContainer() {
     return Container(
-      height: Get.height / 7,
+      height: Get.height / 6,
       width: Get.width / 1.2,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -86,7 +101,7 @@ class _DashboardState extends State<Dashboard> {
                     color: textColor,
                     fontWeight: FontWeight.w600,
                     fontSize: 20)),
-            Text("Scan QR Code to make your attendance",
+            Text("Scan QR Code to mark your attendance",
                 style: GoogleFonts.montserrat(
                     color: textColor,
                     fontWeight: FontWeight.w400,

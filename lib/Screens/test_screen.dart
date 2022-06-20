@@ -34,7 +34,9 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   Future<http.Response> postQrScanId(String userId) async {
-    final data = {"qr_code": userId};
+    final data = {
+      "qr_code": userId,
+    };
     return await http.post(
       Uri.parse('http://saswes.com/api/insert'),
       body: data,
@@ -42,21 +44,33 @@ class _QRViewExampleState extends State<QRViewExample> {
   }
 
   postQrCodeData(String userId) async {
-    var response = await postQrScanId(userId);
-    if (response.statusCode == 200) {
-      Map obj = {};
-      obj = jsonDecode(response.body);
-      debugPrint('Response Body : ${obj['msg'] ?? 'Empty Message'}');
-      speak(obj['user'].toString() + ' ${obj['msg']} ');
-      Get.snackbar(
-        obj['user'].toString(),
-        '${obj['msg'] ?? 'Empty Message'}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: mainColor,
-        colorText: Colors.white,
-      );
-      debugPrint('Response Body : ${response.body} ');
-      debugPrint('Response Body : ${response.statusCode}');
+    try {
+      var response = await postQrScanId(userId);
+      if (response.statusCode == 200) {
+        Map obj = {};
+        obj = jsonDecode(response.body);
+        debugPrint('Response Body : ${obj['msg'] ?? 'Empty Message'}');
+        String? user, msg;
+        user = obj['user'].toString();
+        msg = obj['msg'].toString();
+        if (user == null) {
+          speak(msg);
+        } else {
+          speak(obj['user'].toString() + ' ${obj['msg']} ');
+        }
+
+        Get.snackbar(
+          obj['user'] == null ? "User" : obj['user'].toString(),
+          '${obj['msg'] ?? 'Empty Message'}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: mainColor,
+          colorText: Colors.white,
+        );
+        debugPrint('Response Body : ${response.body} ');
+        debugPrint('Response Body : ${response.statusCode}');
+      }
+    } on Exception catch (e) {
+      print("Error aa rha:" + e.toString());
     }
   }
 
@@ -174,7 +188,9 @@ class _QRViewExampleState extends State<QRViewExample> {
     var scanArea = (MediaQuery.of(context).size.width < 400 ||
             MediaQuery.of(context).size.height < 400)
         ? MediaQuery.of(context).size.height / 1.2
-        : MediaQuery.of(context).size.height / 1.2;
+        : MediaQuery.of(context).orientation == Orientation.landscape
+            ? double.infinity
+            : MediaQuery.of(context).size.height / 1.2;
     // To ensure the Scanner view is properly sizes after rotation
     // we need to listen for Flutter SizeChanged notification and update controller
     return QRView(
@@ -202,12 +218,11 @@ class _QRViewExampleState extends State<QRViewExample> {
       });
       postQrCodeData(scanData.code.toString());
       controller.pauseCamera();
-      Future.delayed(const Duration(seconds: 1),(){
+      Future.delayed(const Duration(seconds: 2), () {
         controller.resumeCamera();
-      });     
-           
+      });
     });
-    
+
     // postQrCodeData(result!.code.toString());
   }
 
