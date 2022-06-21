@@ -5,14 +5,14 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/src/rx_typedefs/rx_typedefs.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'package:sas/widgets/colors.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class QRViewExample extends StatefulWidget {
-  const QRViewExample({Key? key}) : super(key: key);
+  const QRViewExample({Key? key, required this.companyId}) : super(key: key);
+  final String companyId;
 
   @override
   State<StatefulWidget> createState() => _QRViewExampleState();
@@ -36,6 +36,7 @@ class _QRViewExampleState extends State<QRViewExample> {
   Future<http.Response> postQrScanId(String userId) async {
     final data = {
       "qr_code": userId,
+      "org_id": widget.companyId,
     };
     return await http.post(
       Uri.parse('http://saswes.com/api/insert'),
@@ -135,7 +136,7 @@ class _QRViewExampleState extends State<QRViewExample> {
                                       )
                                     : const Icon(
                                         Icons.flash_on,
-                                        size: 28.0,
+                                        size: 30.0,
                                         color: Colors.white,
                                       );
                               },
@@ -157,7 +158,7 @@ class _QRViewExampleState extends State<QRViewExample> {
                                   //     'Camera facing ${describeEnum(snapshot.data!)}');
                                   return const Icon(
                                     Icons.flip_camera_android,
-                                    size: 28.0,
+                                    size: 30.0,
                                     color: Colors.white,
                                   );
                                 } else {
@@ -189,7 +190,7 @@ class _QRViewExampleState extends State<QRViewExample> {
             MediaQuery.of(context).size.height < 400)
         ? MediaQuery.of(context).size.height / 1.2
         : MediaQuery.of(context).orientation == Orientation.landscape
-            ? double.infinity
+            ? MediaQuery.of(context).size.width / 1.1
             : MediaQuery.of(context).size.height / 1.2;
     // To ensure the Scanner view is properly sizes after rotation
     // we need to listen for Flutter SizeChanged notification and update controller
@@ -198,10 +199,10 @@ class _QRViewExampleState extends State<QRViewExample> {
       cameraFacing: CameraFacing.front,
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
-        borderColor: Colors.red,
+        borderColor: mainColor,
         borderRadius: 10,
         borderLength: 30,
-        borderWidth: 10,
+        borderWidth: 15,
         cutOutSize: scanArea,
       ),
       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),

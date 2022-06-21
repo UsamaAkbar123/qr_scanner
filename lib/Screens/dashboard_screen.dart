@@ -42,42 +42,47 @@ class _DashboardState extends State<Dashboard> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: bgColor,
-        body: SizedBox(
-          width: Get.width,
-          child: Column(children: [
-            SizedBox(
-              height: Get.height / 20,
-            ),
-            firstContainer(),
-            SizedBox(
-              height: Get.height / 10,
-            ),
-            Image.network(
-              widget.comapny_logo,
-              colorBlendMode: BlendMode.colorDodge,
-            ),
-            SizedBox(
-              height: Get.height / 20,
-            ),
-            Text("Welcome " + widget.company_name,
-                style: GoogleFonts.montserrat(
-                    color: textColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20)),
-            SizedBox(
-              height: Get.height / 20,
-            ),
-            CustomButton(
-                lable: "Scan Now",
-                onPress: () => Get.to(const QRViewExample(),
-                    transition: Transition.rightToLeftWithFade,
-                    duration: const Duration(seconds: 1)),
-                color: mainColor,
-                radius: 8,
-                buttonHeight: Get.height / 14,
-                buttonWidth: Get.width / 2,
-                labelColor: textColor),
-          ]),
+        body: SingleChildScrollView(
+          child: SizedBox(
+            width: Get.width,
+            child: Column(children: [
+              SizedBox(
+                height: Get.height / 20,
+              ),
+              firstContainer(),
+              SizedBox(
+                height: Get.height / 10,
+              ),
+              Image.network(
+                widget.comapny_logo,
+                colorBlendMode: BlendMode.colorDodge,
+              ),
+              SizedBox(
+                height: Get.height / 20,
+              ),
+              Text("Welcome " + widget.company_name,
+                  style: GoogleFonts.montserrat(
+                      color: textColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20)),
+              SizedBox(
+                height: Get.height / 20,
+              ),
+              CustomButton(
+                  lable: "Scan Now",
+                  onPress: () => Get.to(
+                      QRViewExample(
+                        companyId: widget.company_id,
+                      ),
+                      transition: Transition.rightToLeftWithFade,
+                      duration: const Duration(seconds: 1)),
+                  color: mainColor,
+                  radius: 8,
+                  buttonHeight: Get.height / 14,
+                  buttonWidth: Get.width / 2,
+                  labelColor: textColor),
+            ]),
+          ),
         ),
       ),
     );

@@ -30,7 +30,7 @@ class _SignInScreenState extends State<SignInScreen> {
         child: Container(
           width: Get.width,
           // height: Get.height,
-          padding: EdgeInsets.only(left: 20, right: 25),
+          padding: const EdgeInsets.only(left: 20, right: 25),
           child: Form(
             key: _formKey,
             child: Column(
@@ -41,7 +41,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   height: Get.height / 10,
                 ),
                 Center(
-                    child: Text('SAS',
+                    child: Text('SASWES',
                         style: GoogleFonts.montserrat(
                             textStyle: Theme.of(context).textTheme.headline4,
                             fontWeight: FontWeight.w500,
@@ -114,21 +114,28 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void onloginSccess(String em, String pas) async {
     var response = await _onLogin(em, pas);
+
+    Map signinData = {};
+    signinData = jsonDecode(response.body);
+
     print("ya aya respose" + response.body.toString());
     print(response.statusCode);
 
     if (response.statusCode == 200) {
-      try {
-        Map signinData = {};
-        signinData = jsonDecode(response.body);
-        Get.offAll(Dashboard(
-          company_id: signinData['org_id'],
-          company_name: signinData['org_name'],
-          comapny_logo: signinData['logo'],
-        ));
-      } on Exception catch (e) {
+      if (signinData == {} || signinData["status"] == "false") {
         Get.snackbar("Try Again", "Email or Password is Wrong",
             backgroundColor: mainColor, colorText: textColor);
+      } else {
+        try {
+          Get.offAll(Dashboard(
+            company_id: signinData['org_id'],
+            company_name: signinData['org_name'],
+            comapny_logo: signinData['logo'],
+          ));
+        } on Exception catch (_) {
+          Get.snackbar("Try Again", "Email or Password is Wrong",
+              backgroundColor: mainColor, colorText: textColor);
+        }
       }
     } else {
       Get.snackbar("Error", "something is wrong");
