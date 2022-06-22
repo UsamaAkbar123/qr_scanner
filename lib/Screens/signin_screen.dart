@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
+import 'package:sas/controller/api_services.dart';
+
 import 'package:sas/widgets/colors.dart';
 import 'package:sas/widgets/custom_button.dart';
 import 'package:sas/widgets/custom_text_field.dart';
@@ -82,14 +83,6 @@ class _SignInScreenState extends State<SignInScreen> {
                   labelColor: textColor,
                   color: mainColor,
                   radius: 8,
-                  // onPress: () => onloginSccess(),
-                  //  Get.snackbar(
-                  //   "Login",
-                  //   username.text + password.text,
-                  //   backgroundColor: mainColor,
-                  //   colorText: Colors.white,
-                  // ),
-
                   onPress: () {
                     if (_formKey.currentState!.validate()) {
                       onloginSccess(
@@ -99,8 +92,6 @@ class _SignInScreenState extends State<SignInScreen> {
                           backgroundColor: mainColor, colorText: textColor));
                     }
                   },
-                  // Get.offAll(const Dashboard()),
-                  // _onLogin(context),
                   buttonHeight: Get.height / 15,
                   buttonWidth: Get.width / 2,
                 ),
@@ -113,14 +104,9 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void onloginSccess(String em, String pas) async {
-    var response = await _onLogin(em, pas);
-
+    var response = await ApiServices().onLogin(em, pas);
     Map signinData = {};
     signinData = jsonDecode(response.body);
-
-    print("ya aya respose" + response.body.toString());
-    print(response.statusCode);
-
     if (response.statusCode == 200) {
       if (signinData == {} || signinData["status"] == "false") {
         Get.snackbar("Try Again", "Email or Password is Wrong",
@@ -140,14 +126,5 @@ class _SignInScreenState extends State<SignInScreen> {
     } else {
       Get.snackbar("Error", "something is wrong");
     }
-  }
-
-  Future<http.Response> _onLogin(String email, String pass) async {
-    Map data = {'email': email, 'password': pass};
-    print(data);
-    return await http.post(
-      Uri.parse('http://saswes.com/api/org_login'),
-      body: data,
-    );
   }
 }

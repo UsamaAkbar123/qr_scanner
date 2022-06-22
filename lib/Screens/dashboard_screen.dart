@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sas/Screens/test_screen.dart';
+
 import 'package:sas/widgets/colors.dart';
 import 'package:sas/widgets/custom_button.dart';
+
+import 'scanning_screen.dart';
 
 class Dashboard extends StatefulWidget {
   final String company_id;
@@ -23,22 +25,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   @override
-  void initState() {
-    super.initState();
-    debugPrint(widget.comapny_logo + widget.company_id + widget.company_name);
-    //image1 = Image.asset("images/barcode_cartoon.png");
-  }
-
-  // @override
-  // void didChangeDependencies() {
-  //   //precacheImage(image1.image, context);
-  //   //precacheImage(const AssetImage("images/barcode_cartoon.png"), context);
-  //   super.didChangeDependencies();
-  // }
-
-  @override
   Widget build(BuildContext context) {
-    //precacheImage(image1.image, context);
     return SafeArea(
       child: Scaffold(
         backgroundColor: bgColor,
@@ -71,7 +58,7 @@ class _DashboardState extends State<Dashboard> {
               CustomButton(
                   lable: "Scan Now",
                   onPress: () => Get.to(
-                      QRViewExample(
+                      ScanningScreen(
                         companyId: widget.company_id,
                       ),
                       transition: Transition.rightToLeftWithFade,

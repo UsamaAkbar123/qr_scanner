@@ -1,41 +1,211 @@
+// ignore_for_file: deprecated_member_use, unused_label
+
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:http/http.dart' as http;
+import 'package:sas/controller/api_services.dart';
 import 'package:sas/widgets/colors.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
-class Scanning extends StatefulWidget {
-  const Scanning({Key? key}) : super(key: key);
+class ScanningScreen extends StatefulWidget {
+  const ScanningScreen({Key? key, required this.companyId}) : super(key: key);
+  final String companyId;
 
   @override
-  State<Scanning> createState() => _ScanningState();
+  State<StatefulWidget> createState() => _ScanningScreenState();
 }
 
-class _ScanningState extends State<Scanning> {
+class _ScanningScreenState extends State<ScanningScreen> {
+  Barcode? result;
+  QRViewController? controller;
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  final FlutterTts tts = FlutterTts();
+  final TextEditingController controller1 =
+      TextEditingController(text: 'Hello world');
+
+  speak(String msg) async {
+    await tts.setLanguage('en-US');
+    await tts.setPitch(1); // 0.5 to 1.5
+    await tts.setSpeechRate(0.5);
+    await tts.speak(msg);
+  }
+
+  postQrCodeData(String userId) async {
+    try {
+      var response = await ApiServices().postQrScanId(userId, widget.companyId);
+      if (response.statusCode == 200) {
+        Map obj = {};
+        obj = jsonDecode(response.body);
+        debugPrint('Response Body : ${obj['msg'] ?? 'Empty Message'}');
+        String? user, msg;
+        user = obj['user'].toString();
+        msg = obj['msg'].toString();
+        if (user == null) {
+          speak(msg);
+        } else {
+          speak(obj['user'].toString() + ' ${obj['msg']} ');
+        }
+
+        Get.snackbar(
+          obj['user'] == null ? "User" : obj['user'].toString(),
+          '${obj['msg'] ?? 'Empty Message'}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: mainColor,
+          colorText: Colors.white,
+        );
+      }
+    } on Exception catch (e) {
+      print("Error aa rha:" + e.toString());
+    }
+  }
+
+  // In order to get hot reload to work we need to pause the camera if the platform
+  // is android, or resume the camera if the platform is iOS.
+  @override
+  void reassemble() {
+    super.reassemble();
+    if (Platform.isAndroid) {
+      controller!.pauseCamera();
+    }
+    controller!.resumeCamera();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bgColor,
-      body: Center(
-          child: Container(
-        width: Get.width / 1.2,
-        height: Get.height / 1.5,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-        ),
-        child: Column(
-          children: [
-            SizedBox(
-              height: Get.height / 40,
+      body: Stack(
+        children: <Widget>[
+          _buildQrView(context),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Container(
+                width: Get.width,
+                color: Colors.transparent,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          child: InkWell(
+                            onTap: () async {
+                              await controller?.toggleFlash();
+                              setState(() {});
+                            },
+                            child: FutureBuilder(
+                              future: controller?.getFlashStatus(),
+                              builder: (context, snapshot) {
+                                return snapshot.data == false
+                                    ? const Icon(
+                                        Icons.flash_off,
+                                        size: 28.0,
+                                        color: Colors.white,
+                                      )
+                                    : const Icon(
+                                        Icons.flash_on,
+                                        size: 30.0,
+                                        color: Colors.white,
+                                      );
+                              },
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          child: InkWell(
+                            onTap: () async {
+                              await controller?.flipCamera();
+                              setState(() {});
+                            },
+                            child: FutureBuilder(
+                              future: controller?.getCameraInfo(),
+                              builder: (context, snapshot) {
+                                if (snapshot.data != null) {
+                                  return const Icon(
+                                    Icons.flip_camera_android,
+                                    size: 30.0,
+                                    color: Colors.white,
+                                  );
+                                } else {
+                                  return const Text('loading');
+                                }
+                              },
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
-            Text(
-              "Scanning QR Code",
-              style: GoogleFonts.montserrat(
-                  color: mainColor, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-      )),
+          )
+        ],
+      ),
     );
+  }
+
+  Widget _buildQrView(BuildContext context) {
+    var scanArea = (MediaQuery.of(context).size.width < 400 ||
+            MediaQuery.of(context).size.height < 400)
+        ? MediaQuery.of(context).size.height / 1.2
+        : MediaQuery.of(context).orientation == Orientation.landscape
+            ? MediaQuery.of(context).size.width / 1.1
+            : MediaQuery.of(context).size.height / 1.2;
+    // To ensure the Scanner view is properly sizes after rotation
+    // we need to listen for Flutter SizeChanged notification and update controller
+    return QRView(
+      key: qrKey,
+      cameraFacing: CameraFacing.front,
+      onQRViewCreated: _onQRViewCreated,
+      overlay: QrScannerOverlayShape(
+        borderColor: mainColor,
+        borderRadius: 10,
+        borderLength: 30,
+        borderWidth: 15,
+        cutOutSize: scanArea,
+      ),
+      onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
+    );
+  }
+
+  void _onQRViewCreated(QRViewController controller) {
+    setState(() {
+      this.controller = controller;
+    });
+    controller.scannedDataStream.listen((scanData) {
+      setState(() {
+        result = scanData;
+      });
+      postQrCodeData(scanData.code.toString());
+      controller.pauseCamera();
+      Future.delayed(const Duration(seconds: 2), () {
+        controller.resumeCamera();
+      });
+    });
+  }
+
+  void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
+    log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
+    if (!p) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('no Permission')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
   }
 }
