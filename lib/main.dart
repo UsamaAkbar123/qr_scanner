@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sas/Screens/splash_screen.dart';
+import 'package:sas/sharepreferences/share_preference.dart';
 import 'package:sas/widgets/colors.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferenceKeys.init();
   runApp(const MyApp());
 }
 

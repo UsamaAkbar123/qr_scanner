@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sas/controller/api_services.dart';
+import 'package:sas/sharepreferences/share_preference.dart';
 
 import 'package:sas/widgets/colors.dart';
 import 'package:sas/widgets/custom_button.dart';
@@ -22,6 +23,7 @@ class _SignInScreenState extends State<SignInScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool isRememberMeCheck = false;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -75,6 +77,23 @@ class _SignInScreenState extends State<SignInScreen> {
                   textInputType: TextInputType.text,
                   txtController: passwordController,
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Text(
+                      'Remember me',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Checkbox(
+                      value: isRememberMeCheck,
+                      onChanged: (change) async {
+                        setState(() {
+                          isRememberMeCheck = !isRememberMeCheck;
+                        });
+                      },
+                    ),
+                  ],
+                ),
                 SizedBox(
                   height: Get.height / 15,
                 ),
@@ -86,7 +105,9 @@ class _SignInScreenState extends State<SignInScreen> {
                   onPress: () {
                     if (_formKey.currentState!.validate()) {
                       onloginSccess(
-                          emailController.text, passwordController.text);
+                        emailController.text,
+                        passwordController.text,
+                      );
                     } else {
                       (Get.snackbar("Error", "Something is Wrong",
                           backgroundColor: mainColor, colorText: textColor));
@@ -109,15 +130,34 @@ class _SignInScreenState extends State<SignInScreen> {
     signinData = jsonDecode(response.body);
     if (response.statusCode == 200) {
       if (signinData == {} || signinData["status"] == "false") {
-        Get.snackbar("Try Again", "Email or Password is Wrong",
-            backgroundColor: mainColor, colorText: textColor);
+        Get.snackbar(
+          "Try Again",
+          "Email or Password is Wrong",
+          backgroundColor: mainColor,
+          colorText: textColor,
+        );
       } else {
         try {
+          if (isRememberMeCheck == true) {
+            await SharedPreferenceKeys.setUserLoginRememberMeInfo(true);
+            await SharedPreferenceKeys.setUserLoginInfo(
+              signinData['org_id'],
+              signinData['org_name'],
+              signinData['logo'],
+            );
+          } else {
+            await SharedPreferenceKeys.setUserLoginRememberMeInfo(false);
+            await SharedPreferenceKeys.setUserLoginInfo(
+              signinData['org_id'],
+              signinData['org_name'],
+              signinData['logo'],
+            );
+          }
           Get.offAll(Dashboard(
-            company_id: signinData['org_id'],
-            company_name: signinData['org_name'],
-            comapny_logo: signinData['logo'],
-          ));
+              // company_id: signinData['org_id'],
+              // company_name: signinData['org_name'],
+              // comapny_logo: signinData['logo'],
+              ));
         } on Exception catch (_) {
           Get.snackbar("Try Again", "Email or Password is Wrong",
               backgroundColor: mainColor, colorText: textColor);

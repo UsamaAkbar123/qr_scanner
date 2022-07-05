@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sas/sharepreferences/share_preference.dart';
 
 import 'package:sas/widgets/colors.dart';
 import 'package:sas/widgets/custom_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'scanning_screen.dart';
 
 class Dashboard extends StatefulWidget {
-  final String company_id;
-  final String comapny_logo;
-  final String company_name;
+  // final String company_id;
+  // final String comapny_logo;
+  // final String company_name;
 
-  const Dashboard(
-      {Key? key,
-      required this.company_id,
-      required this.company_name,
-      required this.comapny_logo})
-      : super(key: key);
+  const Dashboard({
+    Key? key,
+    // required this.company_id,
+    // required this.company_name,
+    // required this.comapny_logo,
+  }) : super(key: key);
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -41,13 +43,14 @@ class _DashboardState extends State<Dashboard> {
                 height: Get.height / 10,
               ),
               Image.network(
-                widget.comapny_logo,
+                // widget.comapny_logo,
+                SharedPreferenceKeys.getCompanyLogo(),
                 colorBlendMode: BlendMode.colorDodge,
               ),
               SizedBox(
                 height: Get.height / 20,
               ),
-              Text("Welcome " + widget.company_name,
+              Text("Welcome " + SharedPreferenceKeys.getCompanyName(),
                   style: GoogleFonts.montserrat(
                       color: textColor,
                       fontWeight: FontWeight.w600,
@@ -59,7 +62,8 @@ class _DashboardState extends State<Dashboard> {
                   lable: "Scan Now",
                   onPress: () => Get.to(
                       ScanningScreen(
-                        companyId: widget.company_id,
+                        // companyId: widget.company_id,
+                        companyId: SharedPreferenceKeys.getCompanyId(),
                       ),
                       transition: Transition.rightToLeftWithFade,
                       duration: const Duration(seconds: 1)),

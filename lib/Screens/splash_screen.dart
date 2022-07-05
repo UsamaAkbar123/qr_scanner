@@ -4,7 +4,9 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sas/Screens/dashboard_screen.dart';
 import 'package:sas/Screens/signin_screen.dart';
+import 'package:sas/sharepreferences/share_preference.dart';
 import 'package:sas/widgets/colors.dart';
 
 class splashScreen extends StatefulWidget {
@@ -17,9 +19,16 @@ class splashScreen extends StatefulWidget {
 class _splashScreenState extends State<splashScreen> {
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 5)).then((value) {
-      Get.offAll(() => const SignInScreen());
-    });
+    // getUserLoginRememberMeInfo return true or false
+    if (SharedPreferenceKeys.getUserLoginRememberMeInfo()) {
+      Future.delayed(const Duration(seconds: 5)).then((value) {
+        Get.offAll(() => const Dashboard());
+      });
+    } else {
+      Future.delayed(const Duration(seconds: 5)).then((value) {
+        Get.offAll(() => const SignInScreen());
+      });
+    }
 
     super.initState();
   }
@@ -44,15 +53,16 @@ class _splashScreenState extends State<splashScreen> {
               textStyle: Theme.of(context).textTheme.headline4,
             ),
             child: AnimatedTextKit(
-                repeatForever: false,
-                isRepeatingAnimation: false,
-                animatedTexts: [
-                  TypewriterAnimatedText(
-                    "Smart \n Attendance \n System",
-                    speed: const Duration(milliseconds: 100),
-                    textAlign: TextAlign.center,
-                  ),
-                ]),
+              repeatForever: false,
+              isRepeatingAnimation: false,
+              animatedTexts: [
+                TypewriterAnimatedText(
+                  "Smart \n Attendance \n System",
+                  speed: const Duration(milliseconds: 100),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       ),
