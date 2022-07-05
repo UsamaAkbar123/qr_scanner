@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
         title: 'Smart Attendance System',
         theme: ThemeData(
           primaryColor: mainColor,
+          unselectedWidgetColor: Colors.white,
         ),
         home: const splashScreen());
   }

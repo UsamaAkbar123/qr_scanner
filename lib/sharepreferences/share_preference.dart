@@ -30,4 +30,6 @@ class SharedPreferenceKeys {
     await _preferences?.setString(_company_name, companyName);
     await _preferences?.setString(_company_logo, companyLogo);
   }
+
+  static Future resetPreferenceValue() async => await _preferences?.clear();
 }

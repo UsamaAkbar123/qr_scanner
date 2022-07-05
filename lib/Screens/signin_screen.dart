@@ -82,7 +82,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   children: [
                     Checkbox(
                       focusColor: Colors.green,
-                      activeColor: Colors.amber,
+                      //activeColor: Colors.amber,
                       value: isRememberMeCheck,
                       onChanged: (change) async {
                         setState(() {
@@ -155,11 +155,7 @@ class _SignInScreenState extends State<SignInScreen> {
               signinData['logo'],
             );
           }
-          Get.offAll(Dashboard(
-              // company_id: signinData['org_id'],
-              // company_name: signinData['org_name'],
-              // comapny_logo: signinData['logo'],
-              ));
+          Get.offAll(const Dashboard());
         } on Exception catch (_) {
           Get.snackbar("Try Again", "Email or Password is Wrong",
               backgroundColor: mainColor, colorText: textColor);

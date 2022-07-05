@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sas/Screens/signin_screen.dart';
 import 'package:sas/sharepreferences/share_preference.dart';
 
 import 'package:sas/widgets/colors.dart';
@@ -10,16 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'scanning_screen.dart';
 
 class Dashboard extends StatefulWidget {
-  // final String company_id;
-  // final String comapny_logo;
-  // final String company_name;
-
-  const Dashboard({
-    Key? key,
-    // required this.company_id,
-    // required this.company_name,
-    // required this.comapny_logo,
-  }) : super(key: key);
+  const Dashboard({Key? key}) : super(key: key);
 
   @override
   State<Dashboard> createState() => _DashboardState();
@@ -34,35 +26,34 @@ class _DashboardState extends State<Dashboard> {
         body: SingleChildScrollView(
           child: SizedBox(
             width: Get.width,
-            child: Column(children: [
-              SizedBox(
-                height: Get.height / 20,
-              ),
-              firstContainer(),
-              SizedBox(
-                height: Get.height / 10,
-              ),
-              Image.network(
-                // widget.comapny_logo,
-                SharedPreferenceKeys.getCompanyLogo(),
-                colorBlendMode: BlendMode.colorDodge,
-              ),
-              SizedBox(
-                height: Get.height / 20,
-              ),
-              Text("Welcome " + SharedPreferenceKeys.getCompanyName(),
-                  style: GoogleFonts.montserrat(
-                      color: textColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 20)),
-              SizedBox(
-                height: Get.height / 20,
-              ),
-              CustomButton(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: Get.height / 20,
+                ),
+                firstContainer(),
+                SizedBox(
+                  height: Get.height / 10,
+                ),
+                Image.network(
+                  SharedPreferenceKeys.getCompanyLogo(),
+                  colorBlendMode: BlendMode.colorDodge,
+                ),
+                SizedBox(
+                  height: Get.height / 20,
+                ),
+                Text("Welcome " + SharedPreferenceKeys.getCompanyName(),
+                    style: GoogleFonts.montserrat(
+                        color: textColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20)),
+                SizedBox(
+                  height: Get.height / 20,
+                ),
+                CustomButton(
                   lable: "Scan Now",
                   onPress: () => Get.to(
                       ScanningScreen(
-                        // companyId: widget.company_id,
                         companyId: SharedPreferenceKeys.getCompanyId(),
                       ),
                       transition: Transition.rightToLeftWithFade,
@@ -71,8 +62,23 @@ class _DashboardState extends State<Dashboard> {
                   radius: 8,
                   buttonHeight: Get.height / 14,
                   buttonWidth: Get.width / 2,
-                  labelColor: textColor),
-            ]),
+                  labelColor: textColor,
+                ),
+                const SizedBox(height: 10),
+                CustomButton(
+                  lable: "LogOut",
+                  onPress: () async {
+                    await SharedPreferenceKeys.resetPreferenceValue();
+                    Get.offAll(const SignInScreen());
+                  },
+                  color: mainColor,
+                  radius: 8,
+                  buttonHeight: Get.height / 14,
+                  buttonWidth: Get.width / 2,
+                  labelColor: textColor,
+                ),
+              ],
+            ),
           ),
         ),
       ),
