@@ -78,19 +78,21 @@ class _SignInScreenState extends State<SignInScreen> {
                   txtController: passwordController,
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Remember me',
-                      style: TextStyle(color: Colors.white),
-                    ),
                     Checkbox(
+                      focusColor: Colors.green,
+                      activeColor: Colors.amber,
                       value: isRememberMeCheck,
                       onChanged: (change) async {
                         setState(() {
                           isRememberMeCheck = !isRememberMeCheck;
                         });
                       },
+                    ),
+                    const Text(
+                      'Remember me',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ],
                 ),
